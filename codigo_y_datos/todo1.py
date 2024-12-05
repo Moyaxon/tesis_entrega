@@ -9,6 +9,7 @@ import time
 from random import shuffle
 
 #Importacion y tratamientos de txt
+# para el uso de este archivo hay que cambiar las ubicaciones de lectura al del dispositivo actual, ver ejemplo en la lectura de Transport Vehicle Data
 
 def orders_splitting(data, v_t):
     p = r'[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+'
