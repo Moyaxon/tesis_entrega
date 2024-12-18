@@ -11,19 +11,6 @@ import numpy as np
 
 from random import shuffle, random, randint
 
-#Importacion y tratamientos de txt
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-dir_comp = os.path.join(current_dir, 'data_compartida')
-dir_estudio = os.path.join(current_dir, 'data_estudio')
-dir_pruebas = os.path.join(current_dir, 'data_pruebas')
-dir_ordenes_generadas = os.path.join(current_dir, 'ordenes_generadas')
-file_1 = os.path.join(dir_pruebas, 'vehicle_data1.txt')
-file_2 = os.path.join(dir_comp, 'finish_vehicle_data.txt')
-file_3 = os.path.join(dir_ordenes_generadas, 'customer_order1.txt')
-file_4 = os.path.join(dir_comp, 'model_parameters.txt')
-file_5 = os.path.join(dir_comp, 'pop_data.txt')
-
 #Declaracion de funciones
 
 def orders_splitting(data, v_t):
@@ -64,7 +51,19 @@ def orders_splitting(data, v_t):
         cont += 1
     return data
 
-def lectura_archivos(archivo_1, archivo_2, archivo_3, archivo_4, archivo_5):
+def lectura_archivos(file_transports, file_finished, file_customers, file_parameters, file_pop, carpeta_data, numero_clientes):
+    #Importacion y tratamientos de txt
+    file_customers += ".txt"
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    dir_comp = os.path.join(current_dir, 'data_compartida')
+    dir_data = os.path.join(current_dir, carpeta_data)
+    dir_ordenes_generadas = os.path.join(current_dir, 'ordenes_generadas')
+    archivo_1 = os.path.join(dir_data, file_transports)
+    archivo_2 = os.path.join(dir_comp, file_finished)
+    archivo_3 = os.path.join(dir_ordenes_generadas, file_customers)
+    archivo_4 = os.path.join(dir_comp,file_parameters)
+    archivo_5 = os.path.join(dir_comp,file_pop)
+
     trasport_vehicle_data = []
     finished_vehicle_data = []
     customer_orders_information_with_time_windows = []
@@ -134,7 +133,7 @@ def lectura_archivos(archivo_1, archivo_2, archivo_3, archivo_4, archivo_5):
     orders = []
 
     for line in contents.split('\n'):
-        if len(labels) == 16:
+        if len(labels) == numero_clientes+1:
             break
         row = line.split(' ')
         labels.append(row[0])
@@ -242,10 +241,10 @@ def angle_between(p1, p2):
     ang2 = np.arctan2(*p2[::-1])
     return np.rad2deg((ang1 - ang2) % (2 * np.pi))
 
-def coord():
+def coord(datos_clientes):
     x_y = []
-    for i in range(1, len(c_o_i_t_w[0])):
-        x_y.append([c_o_i_t_w[1][i] - c_o_i_t_w[1][0], c_o_i_t_w[2][i] - c_o_i_t_w[2][0]])
+    for i in range(1, len(datos_clientes[0])):
+        x_y.append([datos_clientes[1][i] - datos_clientes[1][0], datos_clientes[2][i] - datos_clientes[2][0]])
     return x_y
 
 def decision_x(pares_0, orden_vehiculos):
@@ -277,12 +276,12 @@ def decision_y(x, entre_0):
                     y[cliente - 1][j] = 1
     return y
 
-def N_1():
+def N_1(datos_clientes,datos_poblacion):
     i = 1
     n1 = []
     dat = []
     temp = []
-    coords = coord()
+    coords = coord(datos_clientes)
 
     for i in range(len(coords)):
         data = [angle_between([0, 0], coords[i]), i + 1]
@@ -307,20 +306,20 @@ def N_1():
         dat.append(temp_2)
 
     temp = []
-    for i in range(1, len(c_o_i_t_w[0])):
+    for i in range(1, len(datos_clientes[0])):
         temp.append(i)
-    while len(dat) < pop_data[0]:
+    while len(dat) < datos_poblacion[0]:
         temp = temp.copy()
         shuffle(temp)
         dat.append(temp)
 
     return dat
 
-def N_2():
+def N_2(datos_transportes):
     dat = []
-    for i in range(len(t_v_d[0])):
-        if t_v_d[1][i] > 0:
-            dat += [t_v_d[0][i]] * t_v_d[1][i]
+    for i in range(len(datos_transportes[0])):
+        if datos_transportes[1][i] > 0:
+            dat += [datos_transportes[0][i]] * datos_transportes[1][i]
     shuffle(dat)
     return dat
 
@@ -590,8 +589,8 @@ def crossover(n2_sin_modificar: list, seleccion: list,data_fitness: list,poblaci
     prob_cross_clientes = []
     prob_mut_clientes = []
     for i in range(len(nueva_poblacion[4])):
-        prob_cross_clientes.append(cross_prob(nueva_poblacion[4][i], fitness_generacion[1], fitness_generacion[2],datos_pop))
-        prob_mut_clientes.append(mut_prob(nueva_poblacion[4][i], fitness_generacion[1], fitness_generacion[2],datos_pop))
+        prob_cross_clientes.append(cross_prob(nueva_poblacion[4][i], data_fitness[1], data_fitness[2],datos_pop))
+        prob_mut_clientes.append(mut_prob(nueva_poblacion[4][i], data_fitness[1], data_fitness[2],datos_pop))
     nueva_poblacion.pop()
     nueva_poblacion.pop()
     nueva_poblacion.append(prob_cross_clientes)
@@ -820,178 +819,217 @@ def codificado_real( lista_inicial, lista_mejorada, orden_v_mej, info_clientes, 
 
     return fitness
 
-#Paso 1
-#Leer datos
-t_v_d, f_v_i, c_o_i_t_w, p_o_m, pop_data= lectura_archivos(file_1, file_2, file_3, file_4, file_5)
-#Paso 2
-#Crear N1 y N2
-poblacion_inicial = N_1()
-vehicle_order_inicial = N_2()
-datos_esenciales = []
-datos_esenciales.append(poblacion_inicial)
-#Paso 3
-#Modificar N1
-poblacion_inicial_modificada = []
-for poblacion in poblacion_inicial:
-    poblacion_inicial_modificada.append(decodificar_pedidos(poblacion, vehicle_order_inicial, t_v_d, c_o_i_t_w))
-datos_esenciales.append(poblacion_inicial_modificada)
-#Mejora N1 modificado / N2 mejorado
-poblacion_inicial_mejorada = []
-vehicle_order_mejorado = []
-for i in range(len(poblacion_inicial)):
-    pop_mejorada, orden_mejorado = mejora(poblacion_inicial[i],poblacion_inicial_modificada[i],vehicle_order_inicial)
-    poblacion_inicial_mejorada.append(pop_mejorada)
-    vehicle_order_mejorado.append(orden_mejorado)
-datos_esenciales.append(poblacion_inicial_mejorada)
-datos_esenciales.append(vehicle_order_mejorado)
+def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
+    #HVRP-FVL():
+    #Paso 1
+    #Leer datos
+    t_v_d, f_v_i, c_o_i_t_w, p_o_m, pop_data= lectura_archivos(file_1, file_2, file_3, file_4, file_5, folder_data,n_clientes)
+    #Paso 2
+    #Crear N1 y N2
+    poblacion_inicial = N_1(c_o_i_t_w,pop_data)
+    vehicle_order_inicial = N_2(t_v_d)
+    datos_esenciales = []
+    datos_esenciales.append(poblacion_inicial)
+    #Paso 3
+    #Modificar N1
+    poblacion_inicial_modificada = []
+    for poblacion in poblacion_inicial:
+        poblacion_inicial_modificada.append(decodificar_pedidos(poblacion, vehicle_order_inicial, t_v_d, c_o_i_t_w))
+    datos_esenciales.append(poblacion_inicial_modificada)
+    #Mejora N1 modificado / N2 mejorado
+    poblacion_inicial_mejorada = []
+    vehicle_order_mejorado = []
+    for i in range(len(poblacion_inicial)):
+        pop_mejorada, orden_mejorado = mejora(poblacion_inicial[i],poblacion_inicial_modificada[i],vehicle_order_inicial)
+        poblacion_inicial_mejorada.append(pop_mejorada)
+        vehicle_order_mejorado.append(orden_mejorado)
+    datos_esenciales.append(poblacion_inicial_mejorada)
+    datos_esenciales.append(vehicle_order_mejorado)
 
-"""for i in datos_esenciales[0]:
-    print(i)
-print(datos_esenciales[1])
-for i in datos_esenciales[2]:
-    print(i)
-for i in datos_esenciales[3]:
-    print(i)
-for i in datos_esenciales[4]:
-    print(i)"""
-#datos_esenciales = [N1,N1_MOD,N1_MEJ,N2_MEJ,FITNESS_ACTUAL,CROSS,MUT]
-#Calculo Fitness
-fitness_actual = []
-for i in range(len(datos_esenciales[2])):
-    fitness_actual.append(codificado_real(datos_esenciales[0][i],datos_esenciales[2][i],datos_esenciales[3][i],c_o_i_t_w, p_o_m, t_v_d))
-datos_esenciales.append(fitness_actual)
-"""for i in datos_esenciales[4]:
-    print(i)"""
-fitness_generacion = fitness_total(datos_esenciales[4])
-#print(fitness_generacion)
-prob_cross_clientes = []
-prob_mut_clientes = []
-for i in range(len(datos_esenciales[4])):
-    prob_cross_clientes.append(cross_prob(datos_esenciales[4][i], fitness_generacion[1], fitness_generacion[2],pop_data))
-    prob_mut_clientes.append(mut_prob(datos_esenciales[4][i], fitness_generacion[1], fitness_generacion[2],pop_data))
-datos_esenciales.append(prob_cross_clientes)
-datos_esenciales.append(prob_mut_clientes)
-
-minimo = 99999999999999
-pos_minimo = 0
-for i in range(len(datos_esenciales[5])):
-    if datos_esenciales[5][i] < minimo:
-        minimo = datos_esenciales[5][i]
-        pos_minimo = i
-mejores_candidatos_por_generacion = [[datos_esenciales[3][pos_minimo],datos_esenciales[4][pos_minimo],minimo]]# [n1_mej,n2_mej,fitness_opcion]
-print("-------------------------------------Inicio GA--------------------------------")
-tiempos = []
-t_i = 0
-t_f = 0
-
-gen = 999
-#print(data[0])
-while gen < pop_data[3]:
-    tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
-    print("---------------------------------Generacion",str(gen+1)+"--------------------------------")
-    selected = seleccion(datos_esenciales,pop_data[0])
-    t_i = time.time()*1000.0
-    #poblacion_base_codificada[i] = [poblacion_base_codificada[i][0], poblacion_base_codificada[i][2], poblacion_base_codificada[i][3], poblacion_base_codificada[i][4]]
-    #data = [poblacion_base_codificada, fitness_inicial, vehicle_order]
-    #data[1],data[0] = crossover(selected,data[1],data[0])
-    fitness_generacion,datos_esenciales = crossover(vehicle_order_inicial, selected, fitness_generacion, datos_esenciales, pop_data, c_o_i_t_w, t_v_d, p_o_m)
-    t_f = time.time()*1000.0
-    tiempo_generacion[0] += t_f-t_i
-    t_i = time.time()*1000.0
-    fitness_generacion,datos_esenciales = mutacion(fitness_generacion,datos_esenciales,pop_data,t_v_d,c_o_i_t_w,vehicle_order_inicial,p_o_m)
-    t_f = time.time()*1000.0
-    tiempo_generacion[1] += t_f-t_i
-    t_i = time.time()*1000.0
-    datos_esenciales, fitness_generacion = local_search_operator(fitness_generacion,datos_esenciales,pop_data,t_v_d,c_o_i_t_w,vehicle_order_inicial,p_o_m)
-    t_f = time.time()*1000.0
-    tiempo_generacion[2] += t_f-t_i
-    
+    """for i in datos_esenciales[0]:
+        print(i)
+    print(datos_esenciales[1])
+    for i in datos_esenciales[2]:
+        print(i)
+    for i in datos_esenciales[3]:
+        print(i)
+    for i in datos_esenciales[4]:
+        print(i)"""
+    #datos_esenciales = [N1,N1_MOD,N1_MEJ,N2_MEJ,FITNESS_ACTUAL,CROSS,MUT]
+    #Calculo Fitness
+    fitness_actual = []
+    for i in range(len(datos_esenciales[2])):
+        fitness_actual.append(codificado_real(datos_esenciales[0][i],datos_esenciales[2][i],datos_esenciales[3][i],c_o_i_t_w, p_o_m, t_v_d))
+    datos_esenciales.append(fitness_actual)
+    """for i in datos_esenciales[4]:
+        print(i)"""
+    fitness_generacion = fitness_total(datos_esenciales[4])
+    #print(fitness_generacion)
+    prob_cross_clientes = []
+    prob_mut_clientes = []
+    for i in range(len(datos_esenciales[4])):
+        prob_cross_clientes.append(cross_prob(datos_esenciales[4][i], fitness_generacion[1], fitness_generacion[2],pop_data))
+        prob_mut_clientes.append(mut_prob(datos_esenciales[4][i], fitness_generacion[1], fitness_generacion[2],pop_data))
+    datos_esenciales.append(prob_cross_clientes)
+    datos_esenciales.append(prob_mut_clientes)
 
     minimo = 99999999999999
     pos_minimo = 0
-    for i in range(len(datos_esenciales[5])):
-        if datos_esenciales[5][i] < minimo:
-            minimo = datos_esenciales[5][i]
+    for i in range(len(datos_esenciales[4])):
+        if datos_esenciales[4][i] < minimo:
+            minimo = datos_esenciales[4][i]
             pos_minimo = i
-    mejores_candidatos_por_generacion.append([datos_esenciales[3][pos_minimo],datos_esenciales[4][pos_minimo],minimo])# [n1_mej,n2_mej,fitness_opcion]
-    #se ve como quedan los datos y se deja con el formato para el crossover
-    gen += 1
-    tiempos.append(tiempo_generacion)
+    mejores_candidatos_por_generacion = [[datos_esenciales[2][pos_minimo],datos_esenciales[3][pos_minimo],minimo]]# [n1_mej,n2_mej,fitness_opcion]
+    print("-------------------------------------Inicio GA--------------------------------")
+    tiempos = [["-","-","-"]]
+    t_i = 0
+    t_f = 0
+
+    gen = 0
+    #print(data[0])
+    while gen < pop_data[3]:
+        tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
+        print("---------------------------------Generacion",str(gen+1)+"--------------------------------")
+        selected = seleccion(datos_esenciales,pop_data[0])
+        t_i = time.time()
+        #poblacion_base_codificada[i] = [poblacion_base_codificada[i][0], poblacion_base_codificada[i][2], poblacion_base_codificada[i][3], poblacion_base_codificada[i][4]]
+        #data = [poblacion_base_codificada, fitness_inicial, vehicle_order]
+        #data[1],data[0] = crossover(selected,data[1],data[0])
+        fitness_generacion,datos_esenciales = crossover(vehicle_order_inicial, selected, fitness_generacion, datos_esenciales, pop_data, c_o_i_t_w, t_v_d, p_o_m)
+        t_f = time.time()
+        tiempo_generacion[0] = t_f-t_i
+        t_i = time.time()
+        fitness_generacion,datos_esenciales = mutacion(fitness_generacion,datos_esenciales,pop_data,t_v_d,c_o_i_t_w,vehicle_order_inicial,p_o_m)
+        t_f = time.time()
+        tiempo_generacion[1] = t_f-t_i
+        t_i = time.time()
+        datos_esenciales, fitness_generacion = local_search_operator(fitness_generacion,datos_esenciales,pop_data,t_v_d,c_o_i_t_w,vehicle_order_inicial,p_o_m)
+        t_f = time.time()
+        tiempo_generacion[2] = t_f-t_i
+        
+
+        minimo = 99999999999999
+        pos_minimo = 0
+        for i in range(len(datos_esenciales[5])):
+            if datos_esenciales[4][i] < minimo:
+                minimo = datos_esenciales[4][i]
+                pos_minimo = i
+        mejores_candidatos_por_generacion.append([datos_esenciales[2][pos_minimo],datos_esenciales[3][pos_minimo],minimo])# [n1_mej,n2_mej,fitness_opcion]
+        #se ve como quedan los datos y se deja con el formato para el crossover
+        gen += 1
+        tiempos.append(tiempo_generacion)
 
 
-probabilidades = [[],[]]
-for i in range(len(datos_esenciales[0])):
-    probabilidades[0].append(datos_esenciales[5][i])
-    probabilidades[1].append(datos_esenciales[6][i])
-frecuencias1 = [[],[],[],[],[],[]]
-for i in probabilidades[0]:
-    if 0 < i < 0.1:
-        frecuencias1[0].append(i)
-    if 0.1 < i < 0.2:
-        frecuencias1[1].append(i)
-    if 0.2 < i < 0.3:
-        frecuencias1[2].append(i)
-    if 0.3 < i < 0.4:
-        frecuencias1[3].append(i)
-    if 0.4 < i < 0.5:
-        frecuencias1[4].append(i)
-    if i == 0.5:
-        frecuencias1[5].append(i)
-for i in range(len(frecuencias1)):
-    frecuencias1[i] = len(frecuencias1[i])
+    """probabilidades = [[],[]]
+    for i in range(len(datos_esenciales[0])):
+        probabilidades[0].append(datos_esenciales[5][i])
+        probabilidades[1].append(datos_esenciales[6][i])
+    frecuencias1 = [[],[],[],[],[],[]]
+    for i in probabilidades[0]:
+        if 0 < i < 0.1:
+            frecuencias1[0].append(i)
+        if 0.1 < i < 0.2:
+            frecuencias1[1].append(i)
+        if 0.2 < i < 0.3:
+            frecuencias1[2].append(i)
+        if 0.3 < i < 0.4:
+            frecuencias1[3].append(i)
+        if 0.4 < i < 0.5:
+            frecuencias1[4].append(i)
+        if i == 0.5:
+            frecuencias1[5].append(i)
+    for i in range(len(frecuencias1)):
+        frecuencias1[i] = len(frecuencias1[i])
 
-x = np.char.array(['[0, 0.1[', '[0.1, 0.2[', '[0.2, 0.3[','[0.3, 0.4[', '[0.3, 0.4[', '[0.5]'])
-colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
-y = np.array(frecuencias1)
-porcentaje = 100.*y/y.sum()
+    x = np.char.array(['[0, 0.1[', '[0.1, 0.2[', '[0.2, 0.3[','[0.3, 0.4[', '[0.3, 0.4[', '[0.5]'])
+    colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
+    y = np.array(frecuencias1)
+    porcentaje = 100.*y/y.sum()
 
-patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
-labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
+    patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
+    labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
 
-sort_legend = False
-if sort_legend:
-    patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
+    sort_legend = False
+    if sort_legend:
+        patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
 
-plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
+    plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
 
-plt.savefig('piechart1.png', bbox_inches='tight')
+    plt.savefig('piechart1.png', bbox_inches='tight')
 
-frecuencias = [[],[],[],[],[],[]]
-for i in probabilidades[1]:
-    if 0 < i < 0.02:
-        frecuencias[0].append(i)
-    if 0.02 < i < 0.04:
-        frecuencias[1].append(i)
-    if 0.04 < i < 0.06:
-        frecuencias[2].append(i)
-    if 0.06 < i < 0.08:
-        frecuencias[3].append(i)
-    if 0.08 < i < 0.1:
-        frecuencias[4].append(i)
-    if 0 < i == 0.1:
-        frecuencias[5].append(i)
-for i in range(len(frecuencias)):
-    frecuencias[i] = len(frecuencias[i])
+    frecuencias = [[],[],[],[],[],[]]
+    for i in probabilidades[1]:
+        if 0 < i < 0.02:
+            frecuencias[0].append(i)
+        if 0.02 < i < 0.04:
+            frecuencias[1].append(i)
+        if 0.04 < i < 0.06:
+            frecuencias[2].append(i)
+        if 0.06 < i < 0.08:
+            frecuencias[3].append(i)
+        if 0.08 < i < 0.1:
+            frecuencias[4].append(i)
+        if 0 < i == 0.1:
+            frecuencias[5].append(i)
+    for i in range(len(frecuencias)):
+        frecuencias[i] = len(frecuencias[i])
 
-x = np.char.array(['[0, 0.02[', '[0.02, 0.04[', '[0.04, 0.06[','[0.06, 0.08[', '[0.08, 0.1[', '[0.1]'])
-colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
-y = np.array(frecuencias)
-porcentaje = 100.*y/y.sum()
+    x = np.char.array(['[0, 0.02[', '[0.02, 0.04[', '[0.04, 0.06[','[0.06, 0.08[', '[0.08, 0.1[', '[0.1]'])
+    colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
+    y = np.array(frecuencias)
+    porcentaje = 100.*y/y.sum()
 
-patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
-labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
+    patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
+    labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
 
-sort_legend = False
-if sort_legend:
-    patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
+    sort_legend = False
+    if sort_legend:
+        patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
 
-plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
+    plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
 
-plt.savefig('piechart2.png', bbox_inches='tight')
-#for i in range(len(historial_fitness)):
-    #print(historial_fitness[i][0],"\n",historial_fitness[i][1],"\n",int(historial_fitness[i][2]),i)
-for i in range(len(tiempos)):
-    print("-------------------- Generacion",i,"----------------------")
-    print("Tiempo Crossover:            ",tiempos[i][0]/1000.0)
-    print("Tiempo Mutacion:             ",tiempos[i][1]/1000.0)
-    print("Tiempo Local Search Operator:",tiempos[i][2]/1000.0)
+    plt.savefig('piechart2.png', bbox_inches='tight')"""
+    #for i in range(len(historial_fitness)):
+        #print(historial_fitness[i][0],"\n",historial_fitness[i][1],"\n",int(historial_fitness[i][2]),i)
+    """for i in range(1,len(tiempos)):
+        print("-------------------- Generacion",i,"----------------------")
+        print("Tiempo Crossover:            ",tiempos[i][0]/1000.0)
+        print("Tiempo Mutacion:             ",tiempos[i][1]/1000.0)
+        print("Tiempo Local Search Operator:",tiempos[i][2]/1000.0)
+    for i in range(len(mejores_candidatos_por_generacion)): #[n1_mej,n2_mej,fitness_opcion]
+        print("-------------------- Generacion",i,"----------------------")
+        print("N1:     ",mejores_candidatos_por_generacion[i][0])
+        print("N2:     ",mejores_candidatos_por_generacion[i][1])
+        print("Fitness:",mejores_candidatos_por_generacion[i][2])
+    """
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
+    resultados = os.path.join(carpeta_resultados, f"resultado_{n_clientes}_clientes_{file_3}.txt")
+    f = open(resultados, "w")
+    f.write(f"Generacion tiempo_crossover tiempo_mutation tiempo_lso N1 N2 Fitness\n")
+    for i in range(len(mejores_candidatos_por_generacion)):
+        if i == 0:
+            f.write(f"G{i} - - - {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}\n")
+            continue
+        if i == len(mejores_candidatos_por_generacion)-1:
+            f.write(f"G{i} {tiempos[i][0]} {tiempos[i][1]} {tiempos[i][2]} {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}")
+        else:
+            f.write(f"G{i} {tiempos[i][0]} {tiempos[i][1]} {tiempos[i][2]} {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}\n")
+    f.close
+    print(f"Resultados guardados como resultado_{n_clientes}_clientes_{file_3}")
+
+numero_clientes = [10]
+ordenes = ['customer_order1','customer_order2','customer_order3','customer_order4','customer_order5']
+tiempos = []
+for orden in ordenes:
+    for cantidad in numero_clientes:
+        t_i = time.time()
+        hvrp_fvl('vehicle_data1.txt','finish_vehicle_data.txt',orden, 'model_parameters.txt', 'pop_data.txt','data_pruebas', cantidad)
+        t_f = time.time()
+        tiempos.append(t_f-t_i)
+i = 0
+for orden in ordenes:
+    for cantidad in numero_clientes:
+        print(f"N° Clientes: {cantidad} | Order: {orden} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
+    i += 1 
