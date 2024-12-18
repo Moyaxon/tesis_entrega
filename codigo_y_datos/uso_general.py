@@ -885,7 +885,7 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
     t_i = 0
     t_f = 0
 
-    gen = 995
+    gen = 0
     #print(data[0])
     while gen < pop_data[3]:
         tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
