@@ -4,18 +4,17 @@ from random import randint, shuffle
 from orden_aleatoria import generar_orden_aleatoria_por_tipos as generador
 from orden_aleatoria import calcular_minimo_camiones_por_tipo as minimos
 
-def leer_coordenadas_kml():
+def leer_coordenadas_kml(numero_por_tipo, limite_suma_tipos):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     kml_file_path = os.path.join(current_dir, 'coordenadas.kml')
-    
     placemarks = []
     try:
         # Lee el archivo KML
         with open(kml_file_path, 'r', encoding='utf-8') as f:
             root = parser.parse(f).getroot()
-        
         # Busca todos los elementos Placemark en la estructura
         for placemark in root.findall('.//{http://www.opengis.net/kml/2.2}Placemark'):
+            
             name = placemark.name.text if hasattr(placemark, 'name') else 'Sin nombre'
             
             coordinates = []
@@ -37,22 +36,22 @@ def leer_coordenadas_kml():
         base_name = 'customer_order'
         valores_totales = []
         files = 0
-        while files < 10:
+        while files < numero_por_tipo*limite_suma_tipos:
             valores_largo_peso =[]
             counter = 0
             while True:
-                output_file_path = os.path.join(current_dir, f"{base_name}{files+1}.txt")
+                output_file_path = os.path.join(current_dir, f"{base_name}_numero_{numero_por_tipo}_limite_{limite_suma_tipos}.txt")
                 with open(output_file_path, 'w') as f:
                     for coordenada in todas_coordenadas:
                         if counter == 0:
                             f.write(f"{counter} {coordenada[0]} {coordenada[1]} - - -\n")
                         else:
-                            orden = generador()
+                            orden = generador(numero_por_tipo, limite_suma_tipos)
                             valores_largo_peso.append(orden[0])
                             if coordenada == todas_coordenadas[-1]:
-                                f.write(f"D{counter} {coordenada[0]} {coordenada[1]} {randint(1,3)} {randint(5,10)} {orden[1]}")
+                                f.write(f"D{counter} {coordenada[0]} {coordenada[1]} {randint(10,20)} {randint(30,40)} {orden[1]}")
                             else:
-                                f.write(f"D{counter} {coordenada[0]} {coordenada[1]} {randint(1,3)} {randint(5,10)} {orden[1]}\n")
+                                f.write(f"D{counter} {coordenada[0]} {coordenada[1]} {randint(10,20)} {randint(30,40)} {orden[1]}\n")
                         counter +=1
                 print(f"Coordenadas guardadas en {output_file_path}")
                 # Verifica si se escribió algo en el archivo
@@ -67,10 +66,10 @@ def leer_coordenadas_kml():
         print("El archivo KML no se encontró en la ubicación esperada.")
     except Exception as e:
         print(f"Ocurrió un error al leer el archivo KML o procesar los datos: {str(e)}")
-    
-    for i in valores_totales:
-        print(minimos(i))
-
 # Ejecuta la función
-leer_coordenadas_kml()
+numero_maximo_por_tipo = [1,2,3,4,5]
+limite_maximo_suma_tipos = [5,10,15,20,25]
+for numero in numero_maximo_por_tipo:
+    for limite in limite_maximo_suma_tipos:
+        leer_coordenadas_kml(numero, limite)
 

@@ -53,7 +53,7 @@ def orders_splitting(data, v_t):
 
 def lectura_archivos(file_transports, file_finished, file_customers, file_parameters, file_pop, carpeta_data, numero_clientes):
     #Importacion y tratamientos de txt
-    file_customers += ".txt"
+    file_customers = f"customer_order_numero_{file_customers[0]}_limite_{file_customers[1]}.txt"
     current_dir = os.path.dirname(os.path.abspath(__file__))
     dir_comp = os.path.join(current_dir, 'data_compartida')
     dir_data = os.path.join(current_dir, carpeta_data)
@@ -885,7 +885,7 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
     t_i = 0
     t_f = 0
 
-    gen = 0
+    gen = 995
     #print(data[0])
     while gen < pop_data[3]:
         tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
@@ -1005,7 +1005,7 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
-    resultados = os.path.join(carpeta_resultados, f"resultado_{n_clientes}_clientes_{file_3}.txt")
+    resultados = os.path.join(carpeta_resultados, f"resultado_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente.txt")
     f = open(resultados, "w")
     f.write(f"Generacion tiempo_crossover tiempo_mutation tiempo_lso N1 N2 Fitness\n")
     for i in range(len(mejores_candidatos_por_generacion)):
@@ -1017,19 +1017,47 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
         else:
             f.write(f"G{i} {tiempos[i][0]} {tiempos[i][1]} {tiempos[i][2]} {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}\n")
     f.close
-    print(f"Resultados guardados como resultado_{n_clientes}_clientes_{file_3}")
+    print(f"Resultados guardados como resultado_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente")
 
-numero_clientes = [10]
-ordenes = ['customer_order1','customer_order2','customer_order3','customer_order4','customer_order5']
+numero_clientes = [10,20,30,40,50]
+ordenes = [[1,5],[2,5],[2,10],[3,5],[3,10],[3,15],[4,5],[4,10],[4,15],[4,20],[5,5],[5,10],[5,15],[5,20],[5,25]]
 tiempos = []
-for orden in ordenes:
-    for cantidad in numero_clientes:
+current_dir = os.path.dirname(os.path.abspath(__file__))
+carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
+datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos1.txt")
+f = open(datos_y_tiempos, "w")
+f.write(f"n_clientes maximo_por_tipo maximo_por_cliente tiempo_HVRP-FVL\n")
+for cantidad in numero_clientes:
+    for orden in ordenes:
         t_i = time.time()
         hvrp_fvl('vehicle_data1.txt','finish_vehicle_data.txt',orden, 'model_parameters.txt', 'pop_data.txt','data_pruebas', cantidad)
         t_f = time.time()
         tiempos.append(t_f-t_i)
 i = 0
-for orden in ordenes:
-    for cantidad in numero_clientes:
-        print(f"N° Clientes: {cantidad} | Order: {orden} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
-    i += 1 
+for cantidad in numero_clientes:
+    for orden in ordenes:
+        f.write(f" {cantidad} {orden[0]} {orden[1]} {tiempos[i]}\n")
+        print(f"N° Clientes: {cantidad} | Maximo por tipo: {orden[0]} | Maximo por cliente: {orden[1]} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
+        i += 1 
+f.close()
+
+numero_clientes = [60,70,80,90,100]
+tiempos = []
+current_dir = os.path.dirname(os.path.abspath(__file__))
+carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
+datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos2.txt")
+f = open(datos_y_tiempos, "w")
+f.write(f"n_clientes maximo_por_tipo maximo_por_cliente tiempo_HVRP-FVL\n")
+for cantidad in numero_clientes:
+    for orden in ordenes:
+        t_i = time.time()
+        hvrp_fvl('vehicle_data1.txt','finish_vehicle_data.txt',orden, 'model_parameters.txt', 'pop_data.txt','data_pruebas', cantidad)
+        t_f = time.time()
+        tiempos.append(t_f-t_i)
+i = 0
+for cantidad in numero_clientes:
+    for orden in ordenes:
+        f.write(f" {cantidad} {orden[0]} {orden[1]} {tiempos[i]}\n")
+        print(f"N° Clientes: {cantidad} | Maximo por tipo: {orden[0]} | Maximo por cliente: {orden[1]} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
+        i += 1 
+f.close()

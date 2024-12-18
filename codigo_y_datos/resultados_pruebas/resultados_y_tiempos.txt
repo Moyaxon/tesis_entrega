@@ -1,0 +1,3 @@
+n_clientes maximo_por_tipo maximo_por_cliente tiempo_HVRP-FVL
+ 20 1 5 5.489813566207886
+ 20 2 5 5.82271409034729

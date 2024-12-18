@@ -1,7 +1,7 @@
 import random
 
 # Función para generar una orden aleatoria, se ocupa el valor de los camiones de transporte
-def generar_orden_aleatoria_por_tipos():
+def generar_orden_aleatoria_por_tipos(numero_por_tipo, limite_suma_tipos):
     v_t = [['A', 'B', 'C', 'D', 'E'],  # Tipos de carga
        [3.46, 4.135, 4.35, 4.515, 4.865],  # Longitud por tipo (m)
        [0.87, 1.225, 1.27, 1.32, 1.645]]  # Peso por tipo (t)
@@ -17,23 +17,25 @@ def generar_orden_aleatoria_por_tipos():
         orden = {}
         largo_total = 0
         peso_total = 0
-        
+        cantidad_total = 0
         for tipo, largo, peso in zip(tipos_carga, largos, pesos):
-            cantidad = random.randint(0, 5)  # Cantidad aleatoria entre 0 y 5
+            cantidad = random.randint(0, numero_por_tipo)  # Cantidad aleatoria entre 0 y 5
             largo_total += cantidad * largo
             peso_total += cantidad * peso
             if cantidad > 0:
                 orden[tipo] = cantidad
-        
+                cantidad_total += cantidad
+        if cantidad_total > limite_suma_tipos or len(orden) == 0:
+            continue
         # Validar la orden completa
         if largo_total <= largo_maximo and peso_total <= peso_maximo:
             # Si es válida, retornar la orden
             return [[largo_total,peso_total],"+".join(f"{cantidad}{tipo}" for tipo, cantidad in sorted(orden.items()))]
 
 # Uso
-orden_generada = generar_orden_aleatoria_por_tipos()
-print("Orden generada:", orden_generada[1])
-print("Largo y Peso asociado:", orden_generada[0])
+#orden_generada = generar_orden_aleatoria_por_tipos()
+#print("Orden generada:", orden_generada[1])
+#print("Largo y Peso asociado:", orden_generada[0])
 
 # Función para validar si una orden cabe en un camión
 def validar_orden_en_camion(orden, camion):
@@ -81,6 +83,6 @@ def calcular_minimo_camiones_por_tipo(ordenes):
     return camiones_necesarios
 
 # Ejemplo de uso
-ordenes = [[36.435, 10.305], [62.325, 18.69], [36.599999999999994, 10.355], [37.135, 10.955]]
+"""ordenes = [[36.435, 10.305], [62.325, 18.69], [36.599999999999994, 10.355], [37.135, 10.955]]
 resultado = calcular_minimo_camiones_por_tipo(ordenes)
-print("Camiones necesarios por tipo:", resultado)
+print("Camiones necesarios por tipo:", resultado)"""
