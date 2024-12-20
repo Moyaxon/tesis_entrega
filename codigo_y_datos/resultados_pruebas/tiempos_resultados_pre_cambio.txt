@@ -1,0 +1,5 @@
+N° Clientes: 10 | Order: customer_order1 | Tiempo HVRP-FVL: 871.995388507843 segundos.
+N° Clientes: 10 | Order: customer_order2 | Tiempo HVRP-FVL: 1163.640566110611 segundos.
+N° Clientes: 10 | Order: customer_order3 | Tiempo HVRP-FVL: 1131.8870334625244 segundos.
+N° Clientes: 10 | Order: customer_order4 | Tiempo HVRP-FVL: 1228.295024394989 segundos.
+N° Clientes: 10 | Order: customer_order5 | Tiempo HVRP-FVL: 1155.6188213825226 segundos.
