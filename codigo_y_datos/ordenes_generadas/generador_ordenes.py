@@ -2,7 +2,6 @@ from pykml import parser
 import os
 from random import randint, shuffle
 from orden_aleatoria import generar_orden_aleatoria_por_tipos as generador
-from orden_aleatoria import calcular_minimo_camiones_por_tipo as minimos
 
 def leer_coordenadas_kml(numero_por_tipo, limite_suma_tipos):
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -66,7 +65,7 @@ def leer_coordenadas_kml(numero_por_tipo, limite_suma_tipos):
         print("El archivo KML no se encontró en la ubicación esperada.")
     except Exception as e:
         print(f"Ocurrió un error al leer el archivo KML o procesar los datos: {str(e)}")
-# Ejecuta la función
+# Prueba de la función
 numero_maximo_por_tipo = [1,2,3,4,5]
 limite_maximo_suma_tipos = [5,10,15,20,25]
 for numero in numero_maximo_por_tipo:

@@ -673,14 +673,11 @@ def pmx_crossover(parent1, parent2):
     # original code https://observablehq.com/@swissmanu/pmx-crossover
     """
     Performs Partially Mapped Crossover (PMX) on two parent sequences.
-
     Args:
         parent1: The first parent sequence.
         parent2: The second parent sequence.
-
     Returns:
         A tuple containing two child sequences (offspring).
-
     Raises:
         ValueError: If the parents have different lengths.
     """
@@ -740,11 +737,6 @@ def codificado_real( lista_inicial, lista_mejorada, orden_v_mej, info_clientes, 
     for i in range(len(posicion_ceros) - 1):
         sublista = [posicion_ceros[i], posicion_ceros[i + 1]]
         pares_0.append(sublista)
-    """    print(lista_inicial)
-    print(lista_mejorada)
-    print(pares_0)
-    print(orden_v_mej)
-    print(info_clientes[5])"""
     for par in pares_0:
         distancia = []
         aux = []
@@ -803,18 +795,9 @@ def codificado_real( lista_inicial, lista_mejorada, orden_v_mej, info_clientes, 
                 temp.append(i.pop(0))
         resto = i.pop(0)
     distancias = copy.deepcopy(temp)
-    """print(1)
-    print(orden_v_mej)
-    print(pesos)
-    print(distancias_por_porcion)
-    print(entre_0)
-    print(tiempos)
-    print(len(tiempos))
-    print(lista_inicial)"""
     fitness = f_1(orden_v_mej, pesos, distancias_por_porcion, entre_0, parametros, data_v)
     fitness += f_2(lista_inicial, tiempos, info_clientes,parametros)
-    fitness += f_3(orden_v_mej, pesos, distancias_por_porcion, entre_0,parametros,data_v)
-    #print(f_1(orden_v, pesos, distancias_por_porcion, entre_0,p_o_m,t_v_d),f_2(lista_inicial, tiempos),f_3(orden_v, pesos, distancias_por_porcion, entre_0))
+    fitness += f_3(orden_v_mej, pesos, distancias_por_porcion, entre_0,parametros,data_v)  #print(f_1(orden_v, pesos, distancias_por_porcion, entre_0,p_o_m,t_v_d),f_2(lista_inicial, tiempos),f_3(orden_v, pesos, distancias_por_porcion, entre_0))
     #lista_codificada = [lista_sin_modificar_inicial, lista_pre_codificada_inicial, fitness, 0, 0, pares_0, entre_0, pesos, distancias, tiempos]
 
     return fitness
@@ -846,25 +829,13 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
     datos_esenciales.append(poblacion_inicial_mejorada)
     datos_esenciales.append(vehicle_order_mejorado)
 
-    """for i in datos_esenciales[0]:
-        print(i)
-    print(datos_esenciales[1])
-    for i in datos_esenciales[2]:
-        print(i)
-    for i in datos_esenciales[3]:
-        print(i)
-    for i in datos_esenciales[4]:
-        print(i)"""
     #datos_esenciales = [N1,N1_MOD,N1_MEJ,N2_MEJ,FITNESS_ACTUAL,CROSS,MUT]
     #Calculo Fitness
     fitness_actual = []
     for i in range(len(datos_esenciales[2])):
         fitness_actual.append(codificado_real(datos_esenciales[0][i],datos_esenciales[2][i],datos_esenciales[3][i],c_o_i_t_w, p_o_m, t_v_d))
     datos_esenciales.append(fitness_actual)
-    """for i in datos_esenciales[4]:
-        print(i)"""
     fitness_generacion = fitness_total(datos_esenciales[4])
-    #print(fitness_generacion)
     prob_cross_clientes = []
     prob_mut_clientes = []
     for i in range(len(datos_esenciales[4])):
@@ -886,15 +857,11 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
     t_f = 0
 
     gen = 0
-    #print(data[0])
     while gen < pop_data[3]:
         tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
         print("---------------------------------Generacion",str(gen+1)+"--------------------------------")
         selected = seleccion(datos_esenciales,pop_data[0])
         t_i = time.time()
-        #poblacion_base_codificada[i] = [poblacion_base_codificada[i][0], poblacion_base_codificada[i][2], poblacion_base_codificada[i][3], poblacion_base_codificada[i][4]]
-        #data = [poblacion_base_codificada, fitness_inicial, vehicle_order]
-        #data[1],data[0] = crossover(selected,data[1],data[0])
         fitness_generacion,datos_esenciales = crossover(vehicle_order_inicial, selected, fitness_generacion, datos_esenciales, pop_data, c_o_i_t_w, t_v_d, p_o_m)
         t_f = time.time()
         tiempo_generacion[0] = t_f-t_i
@@ -919,114 +886,30 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
         gen += 1
         tiempos.append(tiempo_generacion)
 
-
-    """probabilidades = [[],[]]
-    for i in range(len(datos_esenciales[0])):
-        probabilidades[0].append(datos_esenciales[5][i])
-        probabilidades[1].append(datos_esenciales[6][i])
-    frecuencias1 = [[],[],[],[],[],[]]
-    for i in probabilidades[0]:
-        if 0 < i < 0.1:
-            frecuencias1[0].append(i)
-        if 0.1 < i < 0.2:
-            frecuencias1[1].append(i)
-        if 0.2 < i < 0.3:
-            frecuencias1[2].append(i)
-        if 0.3 < i < 0.4:
-            frecuencias1[3].append(i)
-        if 0.4 < i < 0.5:
-            frecuencias1[4].append(i)
-        if i == 0.5:
-            frecuencias1[5].append(i)
-    for i in range(len(frecuencias1)):
-        frecuencias1[i] = len(frecuencias1[i])
-
-    x = np.char.array(['[0, 0.1[', '[0.1, 0.2[', '[0.2, 0.3[','[0.3, 0.4[', '[0.3, 0.4[', '[0.5]'])
-    colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
-    y = np.array(frecuencias1)
-    porcentaje = 100.*y/y.sum()
-
-    patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
-    labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
-
-    sort_legend = False
-    if sort_legend:
-        patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
-
-    plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
-
-    plt.savefig('piechart1.png', bbox_inches='tight')
-
-    frecuencias = [[],[],[],[],[],[]]
-    for i in probabilidades[1]:
-        if 0 < i < 0.02:
-            frecuencias[0].append(i)
-        if 0.02 < i < 0.04:
-            frecuencias[1].append(i)
-        if 0.04 < i < 0.06:
-            frecuencias[2].append(i)
-        if 0.06 < i < 0.08:
-            frecuencias[3].append(i)
-        if 0.08 < i < 0.1:
-            frecuencias[4].append(i)
-        if 0 < i == 0.1:
-            frecuencias[5].append(i)
-    for i in range(len(frecuencias)):
-        frecuencias[i] = len(frecuencias[i])
-
-    x = np.char.array(['[0, 0.02[', '[0.02, 0.04[', '[0.04, 0.06[','[0.06, 0.08[', '[0.08, 0.1[', '[0.1]'])
-    colors = ['yellowgreen','blue','gold','lightskyblue','lightcoral','red','pink', 'darkgreen','yellow','grey','violet','magenta','cyan']
-    y = np.array(frecuencias)
-    porcentaje = 100.*y/y.sum()
-
-    patches, texts = plt.pie(y, colors=colors, startangle=90, radius=1.2)
-    labels = ['{0} - {1:1.2f} %'.format(i,j) for i,j in zip(x, porcentaje)]
-
-    sort_legend = False
-    if sort_legend:
-        patches, labels, dummy =  zip(*sorted(zip(patches, labels, y),key=lambda x: x[2],reverse=True))
-
-    plt.legend(patches, labels, loc='center left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
-
-    plt.savefig('piechart2.png', bbox_inches='tight')"""
-    #for i in range(len(historial_fitness)):
-        #print(historial_fitness[i][0],"\n",historial_fitness[i][1],"\n",int(historial_fitness[i][2]),i)
-    """for i in range(1,len(tiempos)):
-        print("-------------------- Generacion",i,"----------------------")
-        print("Tiempo Crossover:            ",tiempos[i][0]/1000.0)
-        print("Tiempo Mutacion:             ",tiempos[i][1]/1000.0)
-        print("Tiempo Local Search Operator:",tiempos[i][2]/1000.0)
-    for i in range(len(mejores_candidatos_por_generacion)): #[n1_mej,n2_mej,fitness_opcion]
-        print("-------------------- Generacion",i,"----------------------")
-        print("N1:     ",mejores_candidatos_por_generacion[i][0])
-        print("N2:     ",mejores_candidatos_por_generacion[i][1])
-        print("Fitness:",mejores_candidatos_por_generacion[i][2])
-    """
-
     current_dir = os.path.dirname(os.path.abspath(__file__))
     carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
-    resultados = os.path.join(carpeta_resultados, f"resultado_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente.txt")
+    resultados = os.path.join(carpeta_resultados, f"resultado_especial_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente.txt")
     f = open(resultados, "w")
-    f.write(f"Generacion tiempo_crossover tiempo_mutation tiempo_lso N1 N2 Fitness\n")
+    f.write(f"Generacion,tiempo_crossover,tiempo_mutation,tiempo_lso,N1,N2,Fitness\n")
     for i in range(len(mejores_candidatos_por_generacion)):
         if i == 0:
-            f.write(f"G{i} - - - {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}\n")
+            f.write(f"G{i},-,-,-,{mejores_candidatos_por_generacion[i][0]},{mejores_candidatos_por_generacion[i][1]},{mejores_candidatos_por_generacion[i][2]}\n")
             continue
         if i == len(mejores_candidatos_por_generacion)-1:
-            f.write(f"G{i} {tiempos[i][0]} {tiempos[i][1]} {tiempos[i][2]} {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}")
+            f.write(f"G{i},{tiempos[i][0]},{tiempos[i][1]},{tiempos[i][2]},{mejores_candidatos_por_generacion[i][0]},{mejores_candidatos_por_generacion[i][1]},{mejores_candidatos_por_generacion[i][2]}")
         else:
-            f.write(f"G{i} {tiempos[i][0]} {tiempos[i][1]} {tiempos[i][2]} {mejores_candidatos_por_generacion[i][0]} {mejores_candidatos_por_generacion[i][1]} {mejores_candidatos_por_generacion[i][2]}\n")
+            f.write(f"G{i},{tiempos[i][0]},{tiempos[i][1]},{tiempos[i][2]},{mejores_candidatos_por_generacion[i][0]},{mejores_candidatos_por_generacion[i][1]},{mejores_candidatos_por_generacion[i][2]}\n")
     f.close
-    print(f"Resultados guardados como resultado_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente")
+    print(f"Resultados guardados como resultado_especial_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente")
 
 numero_clientes = [10,20,30,40,50]
 ordenes = [[1,5],[2,5],[2,10],[3,5],[3,10],[3,15],[4,5],[4,10],[4,15],[4,20],[5,5],[5,10],[5,15],[5,20],[5,25]]
 tiempos = []
 current_dir = os.path.dirname(os.path.abspath(__file__))
 carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
-datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos1.txt")
+datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos2.txt")
 f = open(datos_y_tiempos, "w")
-f.write(f"n_clientes maximo_por_tipo maximo_por_cliente tiempo_HVRP-FVL\n")
+f.write(f"n_clientes,maximo_por_tipo,maximo_por_cliente,tiempo_HVRP-FVL\n")
 for cantidad in numero_clientes:
     for orden in ordenes:
         t_i = time.time()
@@ -1036,12 +919,12 @@ for cantidad in numero_clientes:
 i = 0
 for cantidad in numero_clientes:
     for orden in ordenes:
-        f.write(f" {cantidad} {orden[0]} {orden[1]} {tiempos[i]}\n")
+        f.write(f"{cantidad},{orden[0]},{orden[1]},{tiempos[i]}\n")
         print(f"N° Clientes: {cantidad} | Maximo por tipo: {orden[0]} | Maximo por cliente: {orden[1]} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
         i += 1 
 f.close()
 
-numero_clientes = [60,70,80,90,100]
+"""numero_clientes = [60,70,80,90,100]
 tiempos = []
 current_dir = os.path.dirname(os.path.abspath(__file__))
 carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
@@ -1060,4 +943,4 @@ for cantidad in numero_clientes:
         f.write(f" {cantidad} {orden[0]} {orden[1]} {tiempos[i]}\n")
         print(f"N° Clientes: {cantidad} | Maximo por tipo: {orden[0]} | Maximo por cliente: {orden[1]} | Tiempo HVRP-FVL: {tiempos[i]} segundos.")
         i += 1 
-f.close()
+f.close()"""
