@@ -6,7 +6,6 @@ import re
 import math
 import time
 import os
-import matplotlib.pyplot as plt
 import numpy as np
 
 from random import shuffle, random, randint
@@ -246,35 +245,6 @@ def coord(datos_clientes):
     for i in range(1, len(datos_clientes[0])):
         x_y.append([datos_clientes[1][i] - datos_clientes[1][0], datos_clientes[2][i] - datos_clientes[2][0]])
     return x_y
-
-def decision_x(pares_0, orden_vehiculos):
-    pares = []
-    if len(pares_0) == len(orden_vehiculos):
-        for i in range(len(pares_0)):
-            pares.append([pares_0[i], orden_vehiculos[i]])
-    tipos = len(t_v_d[0])  # tipos = len(t_v_d[0])
-    x = []
-    uso = [0] * tipos
-    while len(x) < len(orden_vehiculos):
-        x.append(uso.copy())
-    for i in range(tipos):
-        for j in range(len(pares)):
-            if pares[j][1] == i + 1:
-                x[j][i] = 1
-    return x
-
-def decision_y(x, entre_0):
-    tipos = len(t_v_d[0])  # tipos = len(t_v_d[0])
-    y = []
-    visitas = [0] * tipos
-    while len(y) < len(c_o_i_t_w[0]) - 1:
-        y.append(visitas.copy())
-    for i in range(len(x)):
-        for j in range(len(x[i])):
-            if x[i][j] == 1:
-                for cliente in entre_0[i]:
-                    y[cliente - 1][j] = 1
-    return y
 
 def N_1(datos_clientes,datos_poblacion):
     i = 1
@@ -856,7 +826,7 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
     t_i = 0
     t_f = 0
 
-    gen = 0
+    gen = 990
     while gen < pop_data[3]:
         tiempo_generacion = [0,0,0] #Crossover,Mutation,LSO
         print("---------------------------------Generacion",str(gen+1)+"--------------------------------")
@@ -900,14 +870,14 @@ def hvrp_fvl(file_1, file_2, file_3, file_4, file_5, folder_data, n_clientes):
         else:
             f.write(f"G{i},{tiempos[i][0]},{tiempos[i][1]},{tiempos[i][2]},{mejores_candidatos_por_generacion[i][0]},{mejores_candidatos_por_generacion[i][1]},{mejores_candidatos_por_generacion[i][2]}\n")
     f.close
-    print(f"Resultados guardados como resultado_especial_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_cliente")
+    print(f"Resultados guardados como resultado_especial_{n_clientes}_clientes_maximo_{file_3[0]}_por_tipo_maximo_{file_3[1]}_por_clienteTEST")
 
 numero_clientes = [10,20,30,40,50]
 ordenes = [[1,5],[2,5],[2,10],[3,5],[3,10],[3,15],[4,5],[4,10],[4,15],[4,20],[5,5],[5,10],[5,15],[5,20],[5,25]]
 tiempos = []
 current_dir = os.path.dirname(os.path.abspath(__file__))
 carpeta_resultados = os.path.join(current_dir, 'resultados_pruebas')
-datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos2.txt")
+datos_y_tiempos = os.path.join(carpeta_resultados, f"resultados_y_tiempos.txt")
 f = open(datos_y_tiempos, "w")
 f.write(f"n_clientes,maximo_por_tipo,maximo_por_cliente,tiempo_HVRP-FVL\n")
 for cantidad in numero_clientes:
